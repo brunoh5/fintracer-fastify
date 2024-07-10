@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# environment
+.env
+
+# database
+prisma/*.db
+
+# build
+build
+
+# tests
+coverage

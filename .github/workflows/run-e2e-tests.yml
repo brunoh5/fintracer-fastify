@@ -1,0 +1,45 @@
+name: Run E2E Tests
+
+on: [pull_request]
+
+jobs:
+  run-e2e-tests:
+    name: Run E2e Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: bitnami/postgresql
+        ports:
+          - 5432:5432
+        env:
+          POSTGRESQL_USERNAME: docker
+          POSTGRESQL_PASSWORD: docker
+          POSTGRESQL_DATABASE: fintracer
+
+    steps:
+      - name: Download Application
+        uses: actions/checkout@v3
+
+      - name: Install PNPM package manager
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Run Prisma Generate
+        run: pnpm prisma generate
+
+      - name: Run Tests
+        run: pnpm test:e2e
+        env:
+          JWT_SECRET: 'github-workflow'
+          DATABASE_URL: "postgresql://docker:docker@localhost:5432/fintracer?schema=public"

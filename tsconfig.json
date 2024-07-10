@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "Node16",
+		"lib": ["ES2023"],
+		"experimentalDecorators": true,
+		"baseUrl": "./",
+		"paths": {
+			"@useCases/*": ["./src/use-cases/*"],
+			"@repositories/*": ["./src/repositories/*"],
+			"@lib/*": ["./src/lib/*"],
+			"@/*": [
+				"./src/*"
+			],
+		},
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true
+	}
+}
