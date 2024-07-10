@@ -27,6 +27,10 @@ app.register(fastifyJwt, {
 
 app.register(fastifyCookie)
 
+app.get('/health-check', (_, reply) => {
+	return reply.status(200).send({ message: 'Hello World' })
+})
+
 app.register(usersRoutes)
 app.register(accountRoutes)
 app.register(transactionsRoutes)
