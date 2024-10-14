@@ -1,6 +1,7 @@
-import { Account } from '@prisma/client'
-
-import { AccountsRepository } from '@/repositories/accounts-repository'
+import type {
+	Account,
+	AccountsRepository,
+} from '@/repositories/accounts-repository'
 
 interface FetchAccountsUseCaseRequest {
 	userId: string
@@ -24,13 +25,13 @@ export class FetchAccountsUseCase {
 		userId,
 		pageIndex,
 	}: FetchAccountsUseCaseRequest): Promise<FetchAccountsUseCaseResponse> {
-		const result = await this.accountsRepository.findManyByUserId(userId)
+		const result = await this.accountsRepository.accountsSummary(userId)
 
 		return {
-			accounts: result.accounts || [],
-			totalBalanceInCents: result.total,
+			accounts: result.accounts,
+			totalBalanceInCents: result.totalBalanceInCents,
 			meta: {
-				totalCount: result.accountsCount,
+				totalCount: result.totalAccounts,
 				pageIndex,
 				perPage: 10,
 			},

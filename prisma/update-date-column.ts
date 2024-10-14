@@ -10,7 +10,7 @@ async function updateDateColumn() {
       WHERE "date" IS NULL
     `
 
-		console.log(`Updated ${result} rows.`)
+		console.info(`Updated ${result} rows.`)
 	} catch (error) {
 		console.error('Error updating date column:', error)
 	} finally {

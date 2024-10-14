@@ -1,8 +1,8 @@
-import { User } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
-import { UsersRepository } from '@/repositories/users-repository'
+import type { User, UsersRepository } from '@/repositories/users-repository'
 
+import type { AccountsRepository } from '@repositories/accounts-repository'
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error'
 
 interface RegisterUseCaseRequest {
@@ -16,7 +16,10 @@ interface RegisterUseCaseResponse {
 }
 
 export class RegisterUseCase {
-	constructor(private usersRepository: UsersRepository) {}
+	constructor(
+		private usersRepository: UsersRepository,
+		private accountsRepository: AccountsRepository
+	) {}
 
 	async execute({
 		name,
@@ -34,7 +37,13 @@ export class RegisterUseCase {
 		const user = await this.usersRepository.create({
 			name,
 			email,
-			password_hash,
+			passwordHash: password_hash,
+		})
+
+		await this.accountsRepository.create({
+			bank: 'Conta Inicial',
+			userId: user.id,
+			type: 'CURRENT_ACCOUNT',
 		})
 
 		return {

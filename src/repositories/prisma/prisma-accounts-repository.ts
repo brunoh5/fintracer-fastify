@@ -1,8 +1,8 @@
-import { Account, Prisma } from '@prisma/client'
+import type { Account, Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { AccountsRepository } from '../accounts-repository'
+import type { AccountsRepository } from '../accounts-repository'
 
 export class PrismaAccountsRepository implements AccountsRepository {
 	async updateBalanceAccount(id: string, amount: number) {

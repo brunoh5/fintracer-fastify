@@ -1,8 +1,8 @@
-import { User } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
-import { UsersRepository } from '@/repositories/users-repository'
+import type { User, UsersRepository } from '@/repositories/users-repository'
 
+import { ResourceNotFoundError } from '@useCases/errors/resource-not-found-error'
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 
 interface AuthenticateUseCaseRequest {
@@ -27,9 +27,13 @@ export class AuthenticateUseCase {
 			throw new InvalidCredentialsError()
 		}
 
+		if (!user.passwordHash) {
+			throw new ResourceNotFoundError()
+		}
+
 		const doesPasswordMatches = await bcrypt.compare(
 			password,
-			user.password_hash,
+			user.passwordHash
 		)
 
 		if (!doesPasswordMatches) {

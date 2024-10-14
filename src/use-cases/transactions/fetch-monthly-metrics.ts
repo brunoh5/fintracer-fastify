@@ -1,4 +1,4 @@
-import { TransactionsRepository } from '@/repositories/transactions-repository'
+import type { TransactionsRepository } from '@/repositories/transactions-repository'
 
 interface FetchMonthlyMetricsByYearUseCaseProps {
 	userId: string
@@ -8,9 +8,11 @@ interface FetchMonthlyMetricsByYearUseCaseProps {
 export class FetchMonthlyMetricsByYearUseCase {
 	constructor(private transactionsRepository: TransactionsRepository) {}
 
-	async execute({ userId, year }: FetchMonthlyMetricsByYearUseCaseProps) {
+	async execute({ userId }: FetchMonthlyMetricsByYearUseCaseProps) {
 		const monthlyExpenses =
-			this.transactionsRepository.monthlyExpensesMetricsByYear(year, userId)
+			await this.transactionsRepository.expensesTransactionsSummaryByMonthByYear(
+				userId
+			)
 
 		return monthlyExpenses
 	}

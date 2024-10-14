@@ -1,16 +1,37 @@
-import { Account, Prisma } from '@prisma/client'
+export type Account = {
+	id: string
+	userId?: string
+	bank: string
+	balance?: number
+	type:
+		| 'CURRENT_ACCOUNT'
+		| 'MACHINE_ACCOUNT'
+		| 'SAVINGS_ACCOUNT'
+		| 'INVESTMENT_ACCOUNT'
+}
 
-interface FindManyByUserIdResponse {
+export type CreateOrUpdateAccountRequest = {
+	id?: string
+	bank: string
+	userId?: string
+	type:
+		| 'CURRENT_ACCOUNT'
+		| 'MACHINE_ACCOUNT'
+		| 'SAVINGS_ACCOUNT'
+		| 'INVESTMENT_ACCOUNT'
+}
+
+export type AccountsSummaryResponse = {
 	accounts: Account[]
-	total: number
-	accountsCount: number
+	totalBalanceInCents: number
+	totalAccounts: number
 }
 
 export interface AccountsRepository {
 	updateBalanceAccount(id: string, amount: number): Promise<void>
 	delete(id: string): Promise<void>
-	update(id: string, data: Prisma.AccountUpdateInput): Promise<Account>
-	findManyByUserId(id: string): Promise<FindManyByUserIdResponse>
+	accountsSummary(userId: string): Promise<AccountsSummaryResponse>
 	findById(id: string): Promise<Account | null>
-	create(data: Prisma.AccountUncheckedCreateInput): Promise<Account>
+	create(data: CreateOrUpdateAccountRequest): Promise<Account>
+	update(data: CreateOrUpdateAccountRequest): Promise<Account>
 }

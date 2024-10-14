@@ -1,6 +1,6 @@
 import { compare, hash } from 'bcryptjs'
 
-import { UsersRepository } from '@/repositories/users-repository'
+import type { UsersRepository } from '@/repositories/users-repository'
 
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 import { ResourceNotFoundError } from '../errors/resource-not-found-error'
@@ -25,17 +25,24 @@ export class EditUserUseCase {
 			throw new ResourceNotFoundError()
 		}
 
+		if (!user.passwordHash) {
+			throw new ResourceNotFoundError()
+		}
+
 		const isCurrentPasswordMatches = await compare(
 			current_password,
-			user.password_hash,
+			user?.passwordHash
 		)
 
 		if (!isCurrentPasswordMatches) {
 			throw new InvalidCredentialsError()
 		}
 
-		user.password_hash = await hash(new_password, 6)
+		const new_hashed_password = await hash(new_password, 6)
 
-		await this.usersRepository.update(user, user.id)
+		await this.usersRepository.changeUserCredentials(
+			userId,
+			new_hashed_password
+		)
 	}
 }

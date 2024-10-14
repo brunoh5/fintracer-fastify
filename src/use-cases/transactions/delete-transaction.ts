@@ -1,5 +1,8 @@
-import { AccountsRepository } from '@/repositories/accounts-repository'
-import { TransactionsRepository } from '@/repositories/transactions-repository'
+import type { AccountsRepository } from '@/repositories/accounts-repository'
+import type {
+	Transaction,
+	TransactionsRepository,
+} from '@/repositories/transactions-repository'
 
 import { ResourceNotFoundError } from '../errors/resource-not-found-error'
 
@@ -10,12 +13,12 @@ interface DeleteTransactionUseCaseRequest {
 export class DeleteTransactionUseCase {
 	constructor(
 		private transactionsRepository: TransactionsRepository,
-		private accountsRepository: AccountsRepository,
+		private accountsRepository: AccountsRepository
 	) {}
 
 	async execute({
 		transactionId,
-	}: DeleteTransactionUseCaseRequest): Promise<any> {
+	}: DeleteTransactionUseCaseRequest): Promise<{ transaction: Transaction }> {
 		const transaction =
 			await this.transactionsRepository.findById(transactionId)
 
@@ -25,7 +28,7 @@ export class DeleteTransactionUseCase {
 
 		await this.accountsRepository.updateBalanceAccount(
 			transaction.accountId,
-			transaction.amount * 100 * -1,
+			transaction.amount * 100 * -1
 		)
 
 		await this.transactionsRepository.delete(transactionId)

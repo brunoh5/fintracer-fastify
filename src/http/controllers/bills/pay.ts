@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makePayBillUseCase } from '@useCases/bills/factories/makePayBillUseCase'
@@ -14,9 +14,11 @@ export async function pay(req: FastifyRequest, reply: FastifyReply) {
 		accountId: z.string(),
 		paid_at: z.string().optional(),
 		paid_amount: z.number().optional(),
+		paymentMethod: z.string(),
 	})
 
-	const { accountId, paid_at, paid_amount } = payBillBodySchema.parse(req.body)
+	const { accountId, paid_at, paid_amount, paymentMethod } =
+		payBillBodySchema.parse(req.body)
 
 	const payBillUseCase = makePayBillUseCase()
 
@@ -26,6 +28,7 @@ export async function pay(req: FastifyRequest, reply: FastifyReply) {
 		accountId,
 		paid_at: paid_at ?? new Date(),
 		paid_amount,
+		paymentMethod,
 	})
 
 	return reply.status(204).send()

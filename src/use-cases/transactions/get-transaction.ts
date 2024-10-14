@@ -1,6 +1,7 @@
-import { Transaction } from '@prisma/client'
-
-import { TransactionsRepository } from '@/repositories/transactions-repository'
+import type {
+	Transaction,
+	TransactionsRepository,
+} from '@/repositories/transactions-repository'
 
 import { ResourceNotFoundError } from '../errors/resource-not-found-error'
 
@@ -8,16 +9,12 @@ interface GetTransactionUseCaseRequest {
 	transactionId: string
 }
 
-interface GetTransactionUseCaseResponse {
-	transaction: Transaction
-}
-
 export class GetTransactionUseCase {
 	constructor(private transactionsRepository: TransactionsRepository) {}
 
 	async execute({
 		transactionId,
-	}: GetTransactionUseCaseRequest): Promise<GetTransactionUseCaseResponse> {
+	}: GetTransactionUseCaseRequest): Promise<{ transaction: Transaction }> {
 		const transaction =
 			await this.transactionsRepository.findById(transactionId)
 

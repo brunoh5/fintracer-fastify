@@ -1,0 +1,11 @@
+{
+	"cSpell.words": [
+		"biomejs",
+		"paralleldrive",
+		"randomcolor"
+	],
+	"editor.formatOnSave": true,
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
+}

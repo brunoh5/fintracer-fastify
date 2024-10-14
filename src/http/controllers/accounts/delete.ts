@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeDeleteAccountUseCase } from '@useCases/accounts/factories/makeDeleteAccountUseCase'
@@ -12,7 +12,7 @@ export async function deleteAccount(req: FastifyRequest, reply: FastifyReply) {
 
 	const deleteAccountUseCase = makeDeleteAccountUseCase()
 
-	await deleteAccountUseCase.execute({ accountId: id })
+	await deleteAccountUseCase.execute(id)
 
 	return reply.status(204).send()
 }

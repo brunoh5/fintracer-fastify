@@ -1,11 +1,11 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeGetAccountUseCase } from '@useCases/accounts/factories/makeGetAccountUseCase'
 
 export async function get(req: FastifyRequest, reply: FastifyReply) {
 	const listAccountParamsSchema = z.object({
-		id: z.string().uuid(),
+		id: z.string(),
 	})
 
 	const { id } = listAccountParamsSchema.parse(req.params)

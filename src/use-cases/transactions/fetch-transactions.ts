@@ -1,23 +1,19 @@
-import { Transaction } from '@prisma/client'
-import {
+import type {
 	FindManyTransactionsProps,
+	Transaction,
 	TransactionsRepository,
 } from '@repositories/transactions-repository'
 
 interface FetchTransactionsUseCaseResponse {
 	transactions: Transaction[]
-	transactionsStatus: {
-		totalRevenueInCents: number
-		totalExpenseInCents: number
-	}
+	totalRevenueInCents: number
+	totalExpenseInCents: number
 	meta: {
 		totalCount: number
 		pageIndex: number
 		perPage: number
 	}
 }
-
-type FindManyRequest = FindManyTransactionsProps & { pageIndex: number }
 
 export class FetchTransactionsUseCase {
 	constructor(private transactionsRepository: TransactionsRepository) {}
@@ -32,23 +28,28 @@ export class FetchTransactionsUseCase {
 		from,
 		to,
 		type,
-	}: FindManyRequest): Promise<FetchTransactionsUseCaseResponse> {
-		const { transactions, transactionsCount, transactionsStatus } =
-			await this.transactionsRepository.findManyTransactions({
-				userId,
-				name,
-				pageIndex,
-				accountId,
-				category,
-				payment_method,
-				from,
-				to,
-				type,
-			})
+	}: FindManyTransactionsProps): Promise<FetchTransactionsUseCaseResponse> {
+		const {
+			transactions,
+			transactionsCount,
+			expensesInCents,
+			revenuesInCents,
+		} = await this.transactionsRepository.findManyTransactions({
+			userId,
+			name,
+			pageIndex,
+			accountId,
+			category,
+			payment_method,
+			from,
+			to,
+			type,
+		})
 
 		return {
 			transactions,
-			transactionsStatus,
+			totalExpenseInCents: expensesInCents,
+			totalRevenueInCents: revenuesInCents,
 			meta: {
 				totalCount: transactionsCount,
 				pageIndex,

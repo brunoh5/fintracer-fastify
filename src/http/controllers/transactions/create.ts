@@ -1,13 +1,12 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeCreateTransactionUseCase } from '@/use-cases/transactions/factories/makeCreateTransactionUseCase'
 
 export async function create(req: FastifyRequest, reply: FastifyReply) {
 	const createTransactionBodySchema = z.object({
-		accountId: z.string().uuid(),
+		accountId: z.string(),
 		name: z.string(),
-		shopName: z.string().optional(),
 		amount: z.coerce.number(),
 		date: z.coerce.date().optional(),
 		category: z.enum([
@@ -27,7 +26,7 @@ export async function create(req: FastifyRequest, reply: FastifyReply) {
 		]),
 	})
 
-	const { accountId, category, name, shopName, amount, payment_method, date } =
+	const { accountId, category, name, amount, payment_method, date } =
 		createTransactionBodySchema.parse(req.body)
 
 	const createTransactionUseCase = makeCreateTransactionUseCase()
@@ -36,7 +35,6 @@ export async function create(req: FastifyRequest, reply: FastifyReply) {
 		accountId,
 		category,
 		name,
-		shopName,
 		amount,
 		payment_method,
 		date: date ?? new Date(),

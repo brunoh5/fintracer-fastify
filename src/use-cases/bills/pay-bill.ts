@@ -1,6 +1,6 @@
-import { AccountsRepository } from '@/repositories/accounts-repository'
-import { BillsRepository } from '@/repositories/bills-repository'
-import { TransactionsRepository } from '@/repositories/transactions-repository'
+import type { AccountsRepository } from '@/repositories/accounts-repository'
+import type { BillsRepository } from '@/repositories/bills-repository'
+import type { TransactionsRepository } from '@/repositories/transactions-repository'
 
 import { ResourceNotFoundError } from '../errors/resource-not-found-error'
 
@@ -10,13 +10,14 @@ interface PayBillUseCaseRequest {
 	userId: string
 	paid_at: Date | string
 	paid_amount?: number
+	paymentMethod: string
 }
 
 export class PayBillUseCase {
 	constructor(
 		private billsRepository: BillsRepository,
 		private accountsRepository: AccountsRepository,
-		private transactionsRepository: TransactionsRepository,
+		private transactionsRepository: TransactionsRepository
 	) {}
 
 	async execute({
@@ -25,6 +26,7 @@ export class PayBillUseCase {
 		userId,
 		paid_at,
 		paid_amount,
+		paymentMethod,
 	}: PayBillUseCaseRequest) {
 		const bill = await this.billsRepository.findById(billId)
 
@@ -40,7 +42,7 @@ export class PayBillUseCase {
 
 		await this.accountsRepository.updateBalanceAccount(
 			accountId,
-			paid_amount ?? bill.amount,
+			paid_amount ?? bill.amount
 		)
 
 		await this.transactionsRepository.create({
@@ -48,8 +50,11 @@ export class PayBillUseCase {
 			accountId,
 			userId,
 			amount: paid_amount ?? bill.amount,
+			category: 'OTHERS',
+			payment_method: paymentMethod,
+			date: new Date(paid_at),
 		})
 
-		await this.billsRepository.update(billId, bill)
+		await this.billsRepository.update(bill)
 	}
 }

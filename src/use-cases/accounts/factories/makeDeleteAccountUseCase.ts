@@ -1,15 +1,12 @@
-import { PrismaAccountsRepository } from '@/repositories/prisma/prisma-accounts-repository'
-import { PrismaTransactionsRepository } from '@/repositories/prisma/prisma-transactions-repository'
+// import { PrismaAccountsRepository } from '@/repositories/prisma/prisma-accounts-repository'
 
+import { DrizzleAccountsRepository } from '@repositories/drizzle/drizzle-accounts-repository'
 import { DeleteAccountUseCase } from '../delete-account'
 
 export function makeDeleteAccountUseCase() {
-	const accountsRepository = new PrismaAccountsRepository()
-	const transactionsRepository = new PrismaTransactionsRepository()
-	const useCase = new DeleteAccountUseCase(
-		accountsRepository,
-		transactionsRepository,
-	)
+	// const accountsRepository = new PrismaAccountsRepository()
+	const accountsRepository = new DrizzleAccountsRepository()
+	const useCase = new DeleteAccountUseCase(accountsRepository)
 
 	return useCase
 }

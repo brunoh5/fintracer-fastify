@@ -12,3 +12,5 @@ build
 
 # tests
 coverage
+
+docker-compose.yml

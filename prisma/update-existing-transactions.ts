@@ -14,7 +14,7 @@ async function main() {
 		OR transaction_type = 'CREDIT' AND amount < 0;
 	`
 
-	console.log(`Updated ${result} rows`)
+	console.info(`Updated ${result} rows`)
 }
 
 main()

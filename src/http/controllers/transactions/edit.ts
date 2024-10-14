@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeUpdateTransactionUseCase } from '@/use-cases/transactions/factories/makeUpdateTransactionUseCase'
@@ -40,10 +40,9 @@ export async function edit(req: FastifyRequest, reply: FastifyReply) {
 		id,
 		category,
 		name,
-		shopName,
 		amount,
 		payment_method,
-		date,
+		date: date ? date : new Date(),
 	})
 
 	return reply.status(200).send({ transaction })

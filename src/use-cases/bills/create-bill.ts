@@ -1,28 +1,18 @@
-import { Bill } from '@prisma/client'
-
-import { BillsRepository } from '@/repositories/bills-repository'
-
-interface CreateBillUseCaseRequest {
-	dueDate: string
-	imageUrl?: string
-	title: string
-	description?: string
-	lastCharge?: string
-	amount: number
-	paid_at?: string
-	userId: string
-}
-
-interface CreateBillUseCaseResponse {
-	bill: Bill
-}
+import type {
+	Bill,
+	BillsRepository,
+	CreateOrUpdateBillRequest,
+} from '@/repositories/bills-repository'
+import { ResourceNotFoundError } from '@useCases/errors/resource-not-found-error'
 
 export class CreateBillUseCase {
 	constructor(private billsRepository: BillsRepository) {}
 
-	async execute(
-		data: CreateBillUseCaseRequest,
-	): Promise<CreateBillUseCaseResponse> {
+	async execute(data: CreateOrUpdateBillRequest): Promise<{ bill: Bill }> {
+		if (!data.userId) {
+			throw new ResourceNotFoundError()
+		}
+
 		const bill = await this.billsRepository.create({
 			...data,
 		})

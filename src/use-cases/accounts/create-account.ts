@@ -1,25 +1,15 @@
-import { Account, AccountType } from '@prisma/client'
-
-import { AccountsRepository } from '@/repositories/accounts-repository'
-
-interface CreateAccountUseCaseRequest {
-	type: AccountType
-	bank: string
-	number?: string | null | undefined
-	balance: number
-	userId: string
-}
-
-interface CreateAccountUseCaseResponse {
-	account: Account
-}
+import type {
+	Account,
+	AccountsRepository,
+	CreateOrUpdateAccountRequest,
+} from '@/repositories/accounts-repository'
 
 export class CreateAccountUseCase {
 	constructor(private accountsRepository: AccountsRepository) {}
 
 	async execute(
-		data: CreateAccountUseCaseRequest,
-	): Promise<CreateAccountUseCaseResponse> {
+		data: CreateOrUpdateAccountRequest
+	): Promise<{ account: Account }> {
 		const account = await this.accountsRepository.create({
 			...data,
 		})

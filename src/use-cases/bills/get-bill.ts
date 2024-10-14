@@ -1,4 +1,4 @@
-import { BillsRepository } from '@/repositories/bills-repository'
+import type { BillsRepository } from '@/repositories/bills-repository'
 
 interface GetBillUseCaseRequest {
 	billId: string

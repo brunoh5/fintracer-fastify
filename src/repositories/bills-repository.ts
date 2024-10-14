@@ -1,4 +1,22 @@
-import { Bill, Prisma } from '@prisma/client'
+export type Bill = {
+	id: string
+	dueDate: Date | string
+	title: string
+	description?: string
+	amount: number
+	created_at: Date | string
+	paid_at?: Date | string
+	payment_method?: string | null
+}
+
+export type CreateOrUpdateBillRequest = {
+	id?: string
+	title: string
+	description?: string
+	amount: number
+	paid_at?: Date | string
+	userId?: string
+}
 
 export interface FindManyBillsProps {
 	userId: string
@@ -10,16 +28,13 @@ export interface FindManyBillsProps {
 export interface FindManyBillsResponse {
 	bills: Bill[]
 	billsCount: number
-	totalInCents: number
-	billsStatus: {
-		paidInCents: number
-		notPaidInCents: number
-	}
+	paidInCents: number
+	notPaidInCents: number
 }
 
 export interface BillsRepository {
-	create(data: Prisma.BillUncheckedCreateInput): Promise<Bill>
 	findManyBills(data: FindManyBillsProps): Promise<FindManyBillsResponse>
 	findById(id: string): Promise<Bill | null>
-	update(id: string, data: Prisma.BillUncheckedUpdateInput): Promise<Bill>
+	update(data: CreateOrUpdateBillRequest): Promise<Bill>
+	create(data: CreateOrUpdateBillRequest): Promise<Bill>
 }

@@ -1,5 +1,5 @@
 import { makeFetchMonthlyMetricsByYearUseCase } from '@useCases/transactions/factories/makeMonthlyExpenseUseCase'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export async function monthlyExpensesByYear(
 	req: FastifyRequest,

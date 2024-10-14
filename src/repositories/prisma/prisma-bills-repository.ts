@@ -1,8 +1,8 @@
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/prisma'
 
-import { BillsRepository, FindManyBillsProps } from '../bills-repository'
+import type { BillsRepository, FindManyBillsProps } from '../bills-repository'
 
 export class PrismaBillsRepository implements BillsRepository {
 	async create({
@@ -105,7 +105,7 @@ export class PrismaBillsRepository implements BillsRepository {
 			},
 		})
 
-		const bills = billsResult.map((bill) => {
+		const bills = billsResult.map(bill => {
 			return Object.assign(bill, {
 				amount: undefined,
 				amountInCents: bill.amount,

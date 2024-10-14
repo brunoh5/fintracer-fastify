@@ -1,14 +1,14 @@
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { endOfDay, endOfMonth, startOfDay, startOfMonth } from 'date-fns'
 import dayjs from 'dayjs'
 
 import { prisma } from '@/lib/prisma'
 
 import {
-	FindManyTransactionsProps,
-	MonthExpensesResponse,
+	type FindManyTransactionsProps,
+	type MonthExpensesResponse,
 	MonthlyExpense,
-	TransactionsRepository,
+	type TransactionsRepository,
 } from '../transactions-repository'
 
 export class PrismaTransactionsRepository implements TransactionsRepository {
@@ -251,8 +251,6 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
 			/** @ts-expect-error need to be better */
 			total: Number(monthlyExpenses[month] * -1),
 		}))
-
-		console.log({ monthlyExpenses, formattedExpenses })
 
 		return formattedExpenses
 	}

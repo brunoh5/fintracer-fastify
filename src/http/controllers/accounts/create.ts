@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeCreateAccountUseCase } from '@useCases/accounts/factories/makeCreateAccountUseCase'
@@ -14,21 +14,15 @@ export async function create(req: FastifyRequest, reply: FastifyReply) {
 			])
 			.default('CURRENT_ACCOUNT'),
 		bank: z.string(),
-		number: z.string().optional(),
-		initialAmount: z.number().default(0),
 	})
 
-	const { type, bank, number, initialAmount } = createAccountBodySchema.parse(
-		req.body,
-	)
+	const { type, bank } = createAccountBodySchema.parse(req.body)
 
 	const createAccountUseCase = makeCreateAccountUseCase()
 
 	const { account } = await createAccountUseCase.execute({
 		type,
 		bank,
-		number,
-		balance: initialAmount,
 		userId: req.user.sub,
 	})
 

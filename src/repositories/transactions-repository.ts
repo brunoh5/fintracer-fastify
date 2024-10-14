@@ -1,50 +1,75 @@
-import { $Enums, Prisma, Transaction } from '@prisma/client'
-
-export interface MonthlyExpense {
-	month: Date
-	total: number
-}
+import type { paymentMethod } from '../db/schema'
 
 export interface FindManyTransactionsProps {
-	userId?: string
+	userId: string
 	pageIndex: number
 	from?: string
 	to?: string
 	name?: string
 	accountId?: string
 	type?: 'revenue' | 'expense'
-	payment_method?: $Enums.PaymentMethod
-	category?: $Enums.Category
+	method?: typeof paymentMethod
+	categoryId?: string
+	category?: string
+	payment_method?: string
 }
 
-export interface UserTransactionResponse {
+export type Transaction = {
+	id: string
+	name: string
+	date: Date | null
+	amount: number
+	createdAt?: Date
+	userId?: string
+	accountId: string
+	accountName?: string | null
+	categoryId?: string | null
+	categoryName?: string | null
+	method: 'MONEY' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BANK_TRANSFER'
+}
+
+export type CreateOrUpdateTransactionRequest = {
+	id?: string
+	name: string
+	accountId?: string
+	userId?: string
+	amount: number
+	categoryId?: string
+	category: string
+	payment_method: string
+	date: string | Date
+}
+
+export type GetAllTransactionsByUserIdResponse = {
 	transactions: Transaction[]
 	transactionsCount: number
-	transactionsStatus: {
-		totalRevenueInCents: number
-		totalExpenseInCents: number
-	}
+	revenuesInCents: number
+	expensesInCents: number
 }
 
-export interface MonthExpensesResponse {
-	category: string
-	transactions: Transaction[]
+export type SummaryExpensesByCategory = Record<
+	string,
+	{
+		lastMonth: number
+		currentMonth: number
+	}
+>
+
+export type ExpensesTransactionsSummaryByMonthByYear = {
+	month: string
+	totalAmount: number
 }
 
 export interface TransactionsRepository {
-	monthlyExpensesMetricsByYear(
-		year: number,
-		userId: string,
-	): Promise<MonthlyExpense[]>
-	update(
-		id: string,
-		data: Prisma.TransactionUncheckedUpdateInput,
-	): Promise<Transaction>
-	delete(id: string): Promise<Transaction>
+	expensesTransactionsSummaryByMonthByYear(
+		userId: string
+	): Promise<ExpensesTransactionsSummaryByMonthByYear[]>
+	summaryExpensesByCategory(userId: string): Promise<SummaryExpensesByCategory>
+	delete(id: string): Promise<void>
 	findManyTransactions(
-		data: FindManyTransactionsProps,
-	): Promise<UserTransactionResponse>
+		data: FindManyTransactionsProps
+	): Promise<GetAllTransactionsByUserIdResponse>
 	findById(id: string): Promise<Transaction | null>
-	create(data: Prisma.TransactionUncheckedCreateInput): Promise<Transaction>
-	monthExpenses(userId: string): Promise<MonthExpensesResponse[]>
+	update(data: CreateOrUpdateTransactionRequest): Promise<Transaction>
+	create(data: CreateOrUpdateTransactionRequest): Promise<Transaction>
 }

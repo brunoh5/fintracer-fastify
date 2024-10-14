@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 
 async function main() {
 	/** Reset database */
-	// await prisma.$executeRaw`DROP TABLE IF EXISTS users`
+	// await prisma.$executeRaw`DELETE FROM users`
 	// await prisma.$executeRaw`DELETE FROM accounts`
 	// await prisma.$executeRaw`DELETE FROM transactions`
 	// await prisma.$executeRaw`DELETE FROM bills`

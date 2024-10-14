@@ -1,5 +1,5 @@
 import { makeGetProfileUseCase } from '@useCases/users/factories/makeGetProfileUseCase'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export async function profile(req: FastifyRequest, reply: FastifyReply) {
 	await req.jwtVerify()

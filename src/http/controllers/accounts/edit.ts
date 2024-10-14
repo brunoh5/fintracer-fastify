@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
 import { makeUpdateAccountUseCase } from '@useCases/accounts/factories/makeUpdateAccountUseCase'
@@ -9,7 +9,7 @@ export async function edit(req: FastifyRequest, reply: FastifyReply) {
 	})
 
 	const updateAccountBodySchema = z.object({
-		type: z.string(),
+		type: z.enum(['CURRENT_ACCOUNT', 'MACHINE_ACCOUNT', 'INVESTMENT_ACCOUNT']),
 		bank: z.string(),
 		number: z.string().optional(),
 	})
@@ -21,10 +21,9 @@ export async function edit(req: FastifyRequest, reply: FastifyReply) {
 	const updateAccountByIdUseCase = makeUpdateAccountUseCase()
 
 	const { account } = await updateAccountByIdUseCase.execute({
-		accountId: id,
+		id,
 		type,
 		bank,
-		number: number ?? '',
 	})
 
 	return reply.status(200).send({ account })

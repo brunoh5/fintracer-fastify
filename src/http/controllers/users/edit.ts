@@ -1,5 +1,5 @@
 import { makeEditUserUseCase } from '@useCases/users/factories/makeEditUserUseCase'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 
 export async function edit(req: FastifyRequest, reply: FastifyReply) {

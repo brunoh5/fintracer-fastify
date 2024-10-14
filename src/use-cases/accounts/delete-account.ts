@@ -1,4 +1,4 @@
-import { AccountsRepository } from '@repositories/accounts-repository'
+import type { AccountsRepository } from '@repositories/accounts-repository'
 import { ResourceNotFoundError } from '@useCases/errors/resource-not-found-error'
 
 export class DeleteAccountUseCase {

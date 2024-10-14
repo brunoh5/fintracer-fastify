@@ -1,27 +1,8 @@
-import { Bill } from '@prisma/client'
-
-import { BillsRepository } from '@/repositories/bills-repository'
-
-interface FetchBillsUseCaseProps {
-	userId: string
-	title?: string
-	status?: string
-	pageIndex: number
-}
-
-interface FetchBillsUseCaseResponse {
-	bills: Bill[]
-	totalInCents: number
-	billsStatus: {
-		paidInCents: number
-		notPaidInCents: number
-	}
-	meta: {
-		totalCount: number
-		pageIndex: number
-		perPage: number
-	}
-}
+import type {
+	BillsRepository,
+	FindManyBillsProps,
+	FindManyBillsResponse,
+} from '@/repositories/bills-repository'
 
 export class FetchBillsUseCase {
 	constructor(private billsRepository: BillsRepository) {}
@@ -31,8 +12,8 @@ export class FetchBillsUseCase {
 		title,
 		pageIndex,
 		status,
-	}: FetchBillsUseCaseProps): Promise<FetchBillsUseCaseResponse> {
-		const { bills, billsCount, totalInCents, billsStatus } =
+	}: FindManyBillsProps): Promise<FindManyBillsResponse> {
+		const { bills, billsCount, notPaidInCents, paidInCents } =
 			await this.billsRepository.findManyBills({
 				userId,
 				title,
@@ -42,13 +23,9 @@ export class FetchBillsUseCase {
 
 		return {
 			bills,
-			totalInCents,
-			billsStatus,
-			meta: {
-				totalCount: billsCount,
-				pageIndex,
-				perPage: 10,
-			},
+			notPaidInCents,
+			paidInCents,
+			billsCount,
 		}
 	}
 }
