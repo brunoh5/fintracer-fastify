@@ -1,5 +1,5 @@
 import { db } from '@/db'
-import { accounts, transactions, users } from '@/db/schema'
+import { users } from '@/db/schema'
 
 import type {
 	CreateOrUpdateUserRequest,

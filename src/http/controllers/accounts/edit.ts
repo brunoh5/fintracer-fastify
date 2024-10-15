@@ -11,12 +11,11 @@ export async function edit(req: FastifyRequest, reply: FastifyReply) {
 	const updateAccountBodySchema = z.object({
 		type: z.enum(['CURRENT_ACCOUNT', 'MACHINE_ACCOUNT', 'INVESTMENT_ACCOUNT']),
 		bank: z.string(),
-		number: z.string().optional(),
 	})
 
 	const { id } = updateAccountParamsSchema.parse(req.params)
 
-	const { type, bank, number } = updateAccountBodySchema.parse(req.body)
+	const { type, bank } = updateAccountBodySchema.parse(req.body)
 
 	const updateAccountByIdUseCase = makeUpdateAccountUseCase()
 

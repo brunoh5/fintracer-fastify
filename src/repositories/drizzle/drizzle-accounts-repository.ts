@@ -1,5 +1,5 @@
 import { db } from '@/db'
-import { accounts, transactions } from '@/db/schema'
+import { accounts, } from '@/db/schema'
 import type {
 	Account,
 	AccountsRepository,
@@ -22,8 +22,9 @@ export class DrizzleAccountsRepository implements AccountsRepository {
 		}
 
 		await db
-			.update(transactions)
-			.set({ amount: Number(account.balance + amount) })
+			.update(accounts)
+			.set({ balance: account.balance + amount })
+			.where(eq(accounts.id, id))
 	}
 
 	async delete(id: string): Promise<void> {

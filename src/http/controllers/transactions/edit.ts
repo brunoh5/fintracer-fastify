@@ -30,8 +30,9 @@ export async function edit(req: FastifyRequest, reply: FastifyReply) {
 			.default('MONEY'),
 	})
 
-	const { category, name, shopName, amount, payment_method, date } =
-		editBodySchema.parse(req.body)
+	const { category, name, amount, payment_method, date } = editBodySchema.parse(
+		req.body
+	)
 	const { id } = editParamsSchema.parse(req.params)
 
 	const updateTransactionUseCase = makeUpdateTransactionUseCase()

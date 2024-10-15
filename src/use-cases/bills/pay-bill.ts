@@ -10,7 +10,12 @@ interface PayBillUseCaseRequest {
 	userId: string
 	paid_at: Date | string
 	paid_amount?: number
-	paymentMethod: string
+	payment_method:
+		| 'MONEY'
+		| 'PIX'
+		| 'CREDIT_CARD'
+		| 'DEBIT_CARD'
+		| 'BANK_TRANSFER'
 }
 
 export class PayBillUseCase {
@@ -26,7 +31,7 @@ export class PayBillUseCase {
 		userId,
 		paid_at,
 		paid_amount,
-		paymentMethod,
+		payment_method,
 	}: PayBillUseCaseRequest) {
 		const bill = await this.billsRepository.findById(billId)
 
@@ -51,7 +56,7 @@ export class PayBillUseCase {
 			userId,
 			amount: paid_amount ?? bill.amount,
 			category: 'OTHERS',
-			payment_method: paymentMethod,
+			payment_method,
 			date: new Date(paid_at),
 		})
 

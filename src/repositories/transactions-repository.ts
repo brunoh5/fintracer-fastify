@@ -25,7 +25,12 @@ export type Transaction = {
 	accountName?: string | null
 	categoryId?: string | null
 	categoryName?: string | null
-	method: 'MONEY' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BANK_TRANSFER'
+	paymentMethod:
+		| 'MONEY'
+		| 'PIX'
+		| 'CREDIT_CARD'
+		| 'DEBIT_CARD'
+		| 'BANK_TRANSFER'
 }
 
 export type CreateOrUpdateTransactionRequest = {
@@ -35,9 +40,20 @@ export type CreateOrUpdateTransactionRequest = {
 	userId?: string
 	amount: number
 	categoryId?: string
-	category: string
-	payment_method: string
 	date: string | Date
+	category:
+		| 'OTHERS'
+		| 'HOME'
+		| 'SHOPPING'
+		| 'FOOD'
+		| 'ENTERTAINMENT'
+		| 'TRANSPORTATION'
+	payment_method:
+		| 'MONEY'
+		| 'PIX'
+		| 'CREDIT_CARD'
+		| 'DEBIT_CARD'
+		| 'BANK_TRANSFER'
 }
 
 export type GetAllTransactionsByUserIdResponse = {

@@ -14,7 +14,13 @@ export async function pay(req: FastifyRequest, reply: FastifyReply) {
 		accountId: z.string(),
 		paid_at: z.string().optional(),
 		paid_amount: z.number().optional(),
-		paymentMethod: z.string(),
+		paymentMethod: z.enum([
+			'MONEY',
+			'PIX',
+			'CREDIT_CARD',
+			'DEBIT_CARD',
+			'BANK_TRANSFER',
+		]),
 	})
 
 	const { accountId, paid_at, paid_amount, paymentMethod } =
@@ -28,7 +34,7 @@ export async function pay(req: FastifyRequest, reply: FastifyReply) {
 		accountId,
 		paid_at: paid_at ?? new Date(),
 		paid_amount,
-		paymentMethod,
+		payment_method: paymentMethod,
 	})
 
 	return reply.status(204).send()

@@ -1,5 +1,17 @@
 import dayjs from 'dayjs'
-import { and, asc, desc, eq, gte, ilike, lt, lte, sql, sum } from 'drizzle-orm'
+import {
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	gte,
+	ilike,
+	lt,
+	lte,
+	sql,
+	sum,
+} from 'drizzle-orm'
 
 import { db } from '@/db'
 import { accounts, transactions } from '@/db/schema'
@@ -146,13 +158,12 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 		to,
 		method,
 		name,
-		type,
 		userId,
 	}: FindManyTransactionsProps): Promise<GetAllTransactionsByUserIdResponse> {
 		const startOfDay = dayjs(from).startOf('day').toDate()
 		const endOfDay = dayjs(to).endOf('day').toDate()
 
-		const allTransactions = db.$with('all_transactions').as(
+		const filteredTransactions = db.$with('filtered_transactions').as(
 			db
 				.select({
 					id: transactions.id,
@@ -184,45 +195,98 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				.offset(pageIndex * 10)
 		)
 
-		const revenueTransactions = db.$with('revenues_transactions').as(
-			db
-				.select({
-					amount: allTransactions.amount,
-				})
-				.from(allTransactions)
-				.where(gte(allTransactions.amount, 0))
-		)
+		const allTransactionsCountFiltered = db
+			.$with('all_transactions_count_filtered')
+			.as(
+				db
+					.select({ total: count(transactions) })
+					.from(transactions)
+					.where(
+						and(
+							eq(transactions.userId, userId),
+							method
+								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
+								: undefined,
+							name ? ilike(transactions.name, `%${name}%`) : undefined,
+							accountId ? eq(transactions.accountId, accountId) : undefined,
+							from ? gte(transactions.date, startOfDay) : undefined,
+							to ? lte(transactions.date, endOfDay) : undefined
+						)
+					)
+			)
 
-		const expenseTransactions = db.$with('expense_transactions').as(
-			db
-				.select({
-					amount: allTransactions.amount,
-				})
-				.from(allTransactions)
-				.where(lte(allTransactions.amount, 0))
-		)
+		const revenueTransactionsFiltered = db
+			.$with('revenue_transactions_filtered')
+			.as(
+				db
+					.select({
+						total: sum(transactions.amount).as('total'),
+					})
+					.from(transactions)
+					.where(
+						and(
+							gte(transactions.amount, 0),
+							eq(transactions.userId, userId),
+							method
+								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
+								: undefined,
+							name ? ilike(transactions.name, `%${name}%`) : undefined,
+							accountId ? eq(transactions.accountId, accountId) : undefined,
+							from ? gte(transactions.date, startOfDay) : undefined,
+							to ? lte(transactions.date, endOfDay) : undefined
+						)
+					)
+			)
+
+		const expenseTransactionsFiltered = db
+			.$with('expense_transactions_filtered')
+			.as(
+				db
+					.select({
+						total: sum(transactions.amount).as('total'),
+					})
+					.from(transactions)
+					.where(
+						and(
+							lt(transactions.amount, 0),
+							eq(transactions.userId, userId),
+							method
+								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
+								: undefined,
+							name ? ilike(transactions.name, `%${name}%`) : undefined,
+							accountId ? eq(transactions.accountId, accountId) : undefined,
+							from ? gte(transactions.date, startOfDay) : undefined,
+							to ? lte(transactions.date, endOfDay) : undefined
+						)
+					)
+			)
 
 		const [result] = await db
-			.with(allTransactions, revenueTransactions, expenseTransactions)
+			.with(
+				allTransactionsCountFiltered,
+				revenueTransactionsFiltered,
+				expenseTransactionsFiltered
+			)
 			.select({
 				transactions: sql /*sql*/<Transaction[]>`
-					JSON_AGG(${allTransactions})
+					JSON_AGG(${filteredTransactions})
 				`.as('transactions'),
-				transactionsCount: sql /*sql*/`
-					(SELECT COUNT(${transactions.id}) FROM ${transactions})
+				transactionsCount:
+					sql /*sql*/`SELECT ${allTransactionsCountFiltered.total}`
+						.mapWith(Number)
+						.as('total_transactions'),
+				revenuesInCents: sql /*sql*/`
+					SELECT SUM(${revenueTransactionsFiltered.total})
 				`
 					.mapWith(Number)
-					.as('total'),
-				revenuesInCents: sql /*sql*/`
-					(SELECT SUM(${revenueTransactions.amount})
-					FROM ${revenueTransactions})
-				`.mapWith(Number),
+					.as('revenues_in_cents'),
 				expensesInCents: sql /*sql*/`
-					(SELECT SUM(${expenseTransactions.amount})
-					FROM ${expenseTransactions})
-				`.mapWith(Number),
+					SELECT SUM(${expenseTransactionsFiltered.total})
+				`
+					.mapWith(Number)
+					.as('expenses_in_cents'),
 			})
-			.from(allTransactions)
+			.from(filteredTransactions)
 
 		return result
 	}
@@ -236,7 +300,7 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				amountInCents: transactions.amount,
 				// categoryName: transactionCategories.title,
 				bankAccountName: accounts.bank,
-				method: transactions.paymentMethod,
+				paymentMethod: transactions.paymentMethod,
 				amount: transactions.amount,
 				accountId: transactions.accountId,
 			})
@@ -251,8 +315,40 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 		return transaction
 	}
 
-	update(data: CreateOrUpdateTransactionRequest): Promise<Transaction> {
-		throw new Error('Method not implemented.')
+	async update({
+		id,
+		name,
+		accountId,
+		amount,
+		date,
+		payment_method,
+		category,
+	}: CreateOrUpdateTransactionRequest): Promise<Transaction> {
+		if (!id) {
+			throw new ResourceNotFoundError()
+		}
+
+		const [transaction] = await db
+			.update(transactions)
+			.set({
+				name,
+				accountId,
+				amount,
+				date: new Date(date),
+				paymentMethod: payment_method,
+				category,
+			})
+			.where(eq(transactions.id, id))
+			.returning({
+				id: transactions.id,
+				name: transactions.name,
+				date: transactions.date,
+				amount: transactions.amount,
+				accountId: transactions.accountId,
+				paymentMethod: transactions.paymentMethod,
+			})
+
+		return transaction
 	}
 
 	async create({
@@ -285,7 +381,7 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				accountId: transactions.accountId,
 				userId: transactions.userId,
 				amount: transactions.amount,
-				method: transactions.paymentMethod,
+				paymentMethod: transactions.paymentMethod,
 				date: transactions.date,
 			})
 
