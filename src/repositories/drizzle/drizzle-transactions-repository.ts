@@ -5,12 +5,12 @@ import {
 	count,
 	desc,
 	eq,
+	gt,
 	gte,
 	ilike,
 	lt,
 	lte,
 	sql,
-	sum,
 } from 'drizzle-orm'
 
 import { db } from '@/db'
@@ -195,47 +195,33 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				.offset(pageIndex * 10)
 		)
 
-		const allTransactionsCountFiltered = db
-			.$with('all_transactions_count_filtered')
-			.as(
-				db
-					.select({ total: count(transactions) })
-					.from(transactions)
-					.where(
-						and(
-							eq(transactions.userId, userId),
-							method
-								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
-								: undefined,
-							name ? ilike(transactions.name, `%${name}%`) : undefined,
-							accountId ? eq(transactions.accountId, accountId) : undefined,
-							from ? gte(transactions.date, startOfDay) : undefined,
-							to ? lte(transactions.date, endOfDay) : undefined
-						)
+		const allTransactionsFiltered = db.$with('all_transactions_filtered').as(
+			db
+				.select({ id: transactions.id, amount: transactions.amount })
+				.from(transactions)
+				.where(
+					and(
+						eq(transactions.userId, userId),
+						method
+							? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
+							: undefined,
+						name ? ilike(transactions.name, `%${name}%`) : undefined,
+						accountId ? eq(transactions.accountId, accountId) : undefined,
+						from ? gte(transactions.date, startOfDay) : undefined,
+						to ? lte(transactions.date, endOfDay) : undefined
 					)
-			)
+				)
+		)
 
 		const revenueTransactionsFiltered = db
 			.$with('revenue_transactions_filtered')
 			.as(
 				db
 					.select({
-						total: sum(transactions.amount).as('total'),
+						amount: allTransactionsFiltered.amount,
 					})
-					.from(transactions)
-					.where(
-						and(
-							gte(transactions.amount, 0),
-							eq(transactions.userId, userId),
-							method
-								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
-								: undefined,
-							name ? ilike(transactions.name, `%${name}%`) : undefined,
-							accountId ? eq(transactions.accountId, accountId) : undefined,
-							from ? gte(transactions.date, startOfDay) : undefined,
-							to ? lte(transactions.date, endOfDay) : undefined
-						)
-					)
+					.from(allTransactionsFiltered)
+					.where(gt(allTransactionsFiltered.amount, 0))
 			)
 
 		const expenseTransactionsFiltered = db
@@ -243,27 +229,16 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 			.as(
 				db
 					.select({
-						total: sum(transactions.amount).as('total'),
+						amount: allTransactionsFiltered.amount,
 					})
-					.from(transactions)
-					.where(
-						and(
-							lt(transactions.amount, 0),
-							eq(transactions.userId, userId),
-							method
-								? sql /*sql*/`cast(${transactions.paymentMethod} AS TEXT) = ${method}`
-								: undefined,
-							name ? ilike(transactions.name, `%${name}%`) : undefined,
-							accountId ? eq(transactions.accountId, accountId) : undefined,
-							from ? gte(transactions.date, startOfDay) : undefined,
-							to ? lte(transactions.date, endOfDay) : undefined
-						)
-					)
+					.from(allTransactionsFiltered)
+					.where(lt(allTransactionsFiltered.amount, 0))
 			)
 
 		const [result] = await db
 			.with(
-				allTransactionsCountFiltered,
+				filteredTransactions,
+				allTransactionsFiltered,
 				revenueTransactionsFiltered,
 				expenseTransactionsFiltered
 			)
@@ -271,20 +246,17 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				transactions: sql /*sql*/<Transaction[]>`
 					JSON_AGG(${filteredTransactions})
 				`.as('transactions'),
-				transactionsCount:
-					sql /*sql*/`SELECT ${allTransactionsCountFiltered.total}`
-						.mapWith(Number)
-						.as('total_transactions'),
+				transactionsCount: count(allTransactionsFiltered.id)
+					.mapWith(Number)
+					.as('total_transactions'),
 				revenuesInCents: sql /*sql*/`
-					SELECT SUM(${revenueTransactionsFiltered.total})
-				`
-					.mapWith(Number)
-					.as('revenues_in_cents'),
+					(SELECT SUM(${revenueTransactionsFiltered.amount})
+					FROM ${revenueTransactionsFiltered})
+				`.mapWith(Number),
 				expensesInCents: sql /*sql*/`
-					SELECT SUM(${expenseTransactionsFiltered.total})
-				`
-					.mapWith(Number)
-					.as('expenses_in_cents'),
+					(SELECT SUM(${expenseTransactionsFiltered.amount})
+					FROM ${expenseTransactionsFiltered})
+				`.mapWith(Number),
 			})
 			.from(filteredTransactions)
 
@@ -358,6 +330,8 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 		accountId,
 		userId,
 	}: CreateOrUpdateTransactionRequest): Promise<Transaction> {
+		console.log({ userId, accountId })
+
 		if (!userId) {
 			throw new ResourceNotFoundError()
 		}
