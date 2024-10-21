@@ -5,7 +5,7 @@ import { makeUpdateAccountUseCase } from '@useCases/accounts/factories/makeUpdat
 
 export async function edit(req: FastifyRequest, reply: FastifyReply) {
 	const updateAccountParamsSchema = z.object({
-		id: z.string().uuid(),
+		id: z.string(),
 	})
 
 	const updateAccountBodySchema = z.object({

@@ -5,7 +5,7 @@ import { makeDeleteAccountUseCase } from '@useCases/accounts/factories/makeDelet
 
 export async function deleteAccount(req: FastifyRequest, reply: FastifyReply) {
 	const deleteAccountParamsSchema = z.object({
-		id: z.string().uuid(),
+		id: z.string(),
 	})
 
 	const { id } = deleteAccountParamsSchema.parse(req.params)

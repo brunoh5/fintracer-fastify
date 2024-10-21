@@ -2,7 +2,7 @@ export type Account = {
 	id: string
 	userId?: string
 	bank: string
-	balance?: number
+	balance: number
 	type:
 		| 'CURRENT_ACCOUNT'
 		| 'MACHINE_ACCOUNT'

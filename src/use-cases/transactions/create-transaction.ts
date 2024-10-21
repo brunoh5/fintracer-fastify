@@ -24,11 +24,8 @@ export class CreateTransactionUseCase {
 		if (!accountId) {
 			throw new ResourceNotFoundError()
 		}
-		const account = await this.accountsRepository.findById(accountId)
 
-		if (!account) {
-			throw new ResourceNotFoundError()
-		}
+		await this.accountsRepository.updateBalanceAccount(accountId, amount)
 
 		const transaction = await this.transactionsRepository.create({
 			accountId,
@@ -39,8 +36,6 @@ export class CreateTransactionUseCase {
 			userId,
 			date,
 		})
-
-		await this.accountsRepository.updateBalanceAccount(accountId, amount)
 
 		return {
 			transaction,

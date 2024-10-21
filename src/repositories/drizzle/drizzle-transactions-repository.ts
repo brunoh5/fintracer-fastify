@@ -330,8 +330,6 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 		accountId,
 		userId,
 	}: CreateOrUpdateTransactionRequest): Promise<Transaction> {
-		console.log({ userId, accountId })
-
 		if (!userId) {
 			throw new ResourceNotFoundError()
 		}

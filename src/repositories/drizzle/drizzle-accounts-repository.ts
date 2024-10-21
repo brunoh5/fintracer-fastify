@@ -17,10 +17,6 @@ export class DrizzleAccountsRepository implements AccountsRepository {
 			throw new ResourceNotFoundError()
 		}
 
-		if (!account.balance) {
-			throw new ResourceNotFoundError()
-		}
-
 		await db
 			.update(accounts)
 			.set({ balance: account.balance + amount })

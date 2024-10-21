@@ -5,11 +5,11 @@ import { makeUpdateTransactionUseCase } from '@/use-cases/transactions/factories
 
 export async function edit(req: FastifyRequest, reply: FastifyReply) {
 	const editParamsSchema = z.object({
-		id: z.string().uuid(),
+		id: z.string(),
 	})
 
 	const editBodySchema = z.object({
-		accountId: z.string().uuid(),
+		accountId: z.string(),
 		name: z.string(),
 		shopName: z.any().optional(),
 		amount: z.coerce.number(),

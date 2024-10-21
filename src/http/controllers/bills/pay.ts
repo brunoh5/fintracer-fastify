@@ -5,7 +5,7 @@ import { makePayBillUseCase } from '@useCases/bills/factories/makePayBillUseCase
 
 export async function pay(req: FastifyRequest, reply: FastifyReply) {
 	const payBillParamsSchema = z.object({
-		billId: z.string().uuid(),
+		billId: z.string(),
 	})
 
 	const { billId } = payBillParamsSchema.parse(req.params)

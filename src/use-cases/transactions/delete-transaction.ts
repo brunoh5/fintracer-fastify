@@ -28,7 +28,7 @@ export class DeleteTransactionUseCase {
 
 		await this.accountsRepository.updateBalanceAccount(
 			transaction.accountId,
-			transaction.amount * 100 * -1
+			transaction.amount * -1
 		)
 
 		await this.transactionsRepository.delete(transactionId)

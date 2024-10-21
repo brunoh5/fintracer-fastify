@@ -5,10 +5,10 @@ import { makeDeleteTransactionUseCase } from '@/use-cases/transactions/factories
 
 export async function deleteTransaction(
 	req: FastifyRequest,
-	reply: FastifyReply,
+	reply: FastifyReply
 ) {
 	const deleteTransactionParamsSchema = z.object({
-		id: z.string().uuid(),
+		id: z.string(),
 	})
 
 	const { id } = deleteTransactionParamsSchema.parse(req.params)
