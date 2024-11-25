@@ -246,7 +246,7 @@ export class DrizzleTransactionsRepository implements TransactionsRepository {
 				transactions: sql /*sql*/<Transaction[]>`
 					JSON_AGG(${filteredTransactions})
 				`.as('transactions'),
-				transactionsCount: count(allTransactionsFiltered.id)
+				transactionsCount: count(filteredTransactions.id)
 					.mapWith(Number)
 					.as('total_transactions'),
 				revenuesInCents: sql /*sql*/`
